@@ -1,6 +1,8 @@
 using BookStoreApp.API.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 using Serilog;
+using BookStoreApp.API.Configrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 var connString=builder.Configuration.GetConnectionString("BookStoreAppDbConnection");
 builder.Services.AddDbContext<BookStoreDbContext>(options=>options.UseSqlServer(connString));
 
-builder.Services.AddControllers();
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
+
+builder.Services.AddAutoMapper(typeof(MapperConfig));
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
