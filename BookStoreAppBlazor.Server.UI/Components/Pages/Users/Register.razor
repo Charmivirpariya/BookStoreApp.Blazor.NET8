@@ -1,0 +1,84 @@
+﻿@page "/users/register"
+@inject Client httpClient
+@inject NavigationManager navManager
+@using BookStoreAppBlazor.Server.UI.Services.Base
+<h3>Register New Account</h3>
+@if (string.IsNullOrEmpty(message) == false)
+{
+    <div class="alert alert-danger">
+        <p>@message</p>
+    </div>
+}
+<div class="card-body">
+    <EditForm Model="RegistrationModel" OnValidSubmit="HandleRegistration">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label class="form-label">First Name</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.FirstName" />
+            <ValidationMessage For="@(() => RegistrationModel.FirstName)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Last Name</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.LastName" />
+            <ValidationMessage For="@(() => RegistrationModel.LastName)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.Email" />
+            <ValidationMessage For="@(() => RegistrationModel.Email)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <InputText class="form-control"
+                       type="password"
+                       @bind-Value="RegistrationModel.Password" />
+            <ValidationMessage For="@(() => RegistrationModel.Password)" />
+        </div>
+
+        @* <div class="mb-3">
+            <label class="form-label">Role</label>
+            <InputSelect class="form-select" @bind-Value="RegistrationModel.Role">
+                <option value="">-- Select Role --</option>
+                <option value="Administrator">Administrator</option>
+                <option value="User">User</option>
+            </InputSelect>
+        </div> *@
+
+        <button type="submit" class="btn btn-primary">
+            Register
+        </button>
+    </EditForm>
+</div>
+@code {
+    UserDto RegistrationModel = new UserDto
+    {
+        Role="User"
+    };
+    string message = string.Empty;
+    private async Task HandleRegistration()
+    {
+        RegistrationModel.Role = "User";
+        try
+        {
+            await httpClient.RegisterAsync(RegistrationModel);
+            NavigateToLogin();
+        }
+        catch(ApiException ex)
+        {
+            if(ex.StatusCode>=200 && ex.StatusCode <= 299)
+            {
+                NavigateToLogin();
+            }
+            message = ex.Message;
+        }
+
+    }
+    private void NavigateToLogin()
+    {
+        navManager.NavigateTo("/users/login");
+    }
+}
