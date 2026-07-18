@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookStoreApp.API.Data;
@@ -27,24 +26,38 @@ public partial class BookStoreDbContext : IdentityDbContext<ApiUser>
         {
             entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.FirstName).HasMaxLength(50);
-            entity.Property(e => e.LastName).HasMaxLength(50);
-            entity.Property(e => e.Bio).HasMaxLength(250);
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(50);
+
+            entity.Property(e => e.LastName)
+                .HasMaxLength(50);
+
+            entity.Property(e => e.Bio)
+                .HasMaxLength(250);
         });
 
         modelBuilder.Entity<Book>(entity =>
         {
             entity.HasKey(e => e.Id);
 
-            entity.HasIndex(e => e.Isbn).IsUnique();
+            entity.HasIndex(e => e.Isbn)
+                .IsUnique();
 
-            entity.Property(e => e.Title).HasMaxLength(50);
+            entity.Property(e => e.Title)
+                .HasMaxLength(100);
+
             entity.Property(e => e.Isbn)
-                .HasMaxLength(50)
-                .HasColumnName("ISBN");
-            entity.Property(e => e.Summary).HasMaxLength(250);
-            entity.Property(e => e.Image).HasMaxLength(50);
-            entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+                .HasColumnName("ISBN")
+                .HasMaxLength(100);
+
+            entity.Property(e => e.Summary)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Image)
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.Price)
+                .HasColumnType("decimal(18,2)");
 
             entity.HasOne(d => d.Author)
                 .WithMany(p => p.Books)

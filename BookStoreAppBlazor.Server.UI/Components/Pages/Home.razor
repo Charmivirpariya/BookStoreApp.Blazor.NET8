@@ -1,7 +1,20 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, charmi!</h1>
+<AuthorizeView Context="authState">
+    <Authorized>
+        <h1>Hello, @authState.User.Identity?.Name!</h1>
 
-Welcome to your new app.
+        <p>Welcome to your new app.</p>
+
+      
+    </Authorized>
+
+    <NotAuthorized>
+        <h1>Hello!</h1>
+
+        <p>Welcome to your new app.</p>
+    </NotAuthorized>
+</AuthorizeView>

@@ -19,6 +19,7 @@ namespace BookStoreApp.API.Models.Book
         [StringLength(250,MinimumLength = 10)]
         public string Summary { get; set; }
 
+        [StringLength(500)]
         public string Image { get; set; }
 
         [Required]

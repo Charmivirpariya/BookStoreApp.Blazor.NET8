@@ -56,9 +56,9 @@ namespace BookStoreApp.API.Controllers
             }
             catch (Exception ex)
             {
-                //return StatusCode(500, ex.ToString());
-                logger.LogError(ex, $"Something went wrong in the {nameof(Register)}");
-                return Problem($"Something went wrong in the {nameof(Register)}", statusCode: 500);
+                return StatusCode(500, ex.ToString());
+                //logger.LogError(ex, $"Something went wrong in the {nameof(Register)}");
+                //return Problem($"Something went wrong in the {nameof(Register)}", statusCode: 500);
             } 
         }
 
@@ -84,12 +84,13 @@ namespace BookStoreApp.API.Controllers
                     Token = tokenString,
                     Email = user.Email
                 };
-                return Accepted(response);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Something went wrong in the {nameof(Login)}");
-                return Problem($"Something went wrong in the {nameof(Login)}", statusCode: 500);
+                return StatusCode(500, ex.ToString());
+                //logger.LogError(ex, $"Something went wrong in the {nameof(Login)}");
+                //return Problem($"Something went wrong in the {nameof(Login)}", statusCode: 500);
             }
         }
 
@@ -108,7 +109,9 @@ namespace BookStoreApp.API.Controllers
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.NameIdentifier, user.Id)
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.Email)
+
             };
             claims.AddRange(roleClaims);
             claims.AddRange(userClaims);
