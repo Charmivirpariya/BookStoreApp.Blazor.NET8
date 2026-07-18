@@ -1,0 +1,67 @@
+﻿@page "/authors/update/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+@* @using BookStoreApp.API.Models.Author *@
+@inject IAuthorService AuthorService
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = Roles.Administrator)]
+
+<h3>Update Author</h3>
+
+<EditForm Model="author" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">First Name</label>
+        <InputText class="form-control" @bind-Value="author.FirstName" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Last Name</label>
+        <InputText class="form-control" @bind-Value="author.LastName" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Bio</label>
+        <InputTextArea class="form-control" @bind-Value="author.Bio" rows="5" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        <span class="bi bi-save"></span> Update
+    </button>
+
+    <a class="btn btn-secondary ms-2" href="/authors/index">
+        <span class="bi bi-arrow-left"></span> Back
+    </a>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    
+    private AuthorUpdateDto author = new AuthorUpdateDto();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var response = await AuthorService.GetAuthorForUpdate(id);
+        if (response.Success)
+        {
+            author = response.Data;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        
+        var response = await AuthorService.UpdateAuthor(id, author);
+        Console.WriteLine($"Success: {response.Success}");
+        Console.WriteLine($"Message: {response.Message}");
+
+        if (response.Success)
+        {
+            NavigationManager.NavigateTo("/authors/index");
+        }
+    }
+}

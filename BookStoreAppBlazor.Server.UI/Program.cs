@@ -4,6 +4,8 @@ using BookStoreAppBlazor.Server.UI.Services.Base;
 using BookStoreAppBlazor.Server.UI.Services.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using BookStoreAppBlazor.Server.UI.Providers;
+using BookStoreAppBlazor.Server.UI.Services;
+using BookStoreAppBlazor.Server.UI.Configration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +32,9 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
 
 // Services
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IAuthorService, AuthorService>();
 
+builder.Services.AddAutoMapper(typeof(MapperConfig));
 
 var app = builder.Build();
 

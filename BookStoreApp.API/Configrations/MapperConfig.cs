@@ -12,6 +12,7 @@ namespace BookStoreApp.API.Configrations
         {
             CreateMap<AuthorCreateDto, Author>();
             CreateMap<AuthorUpdateDto, Author>();
+            CreateMap<Author, AuthorDetailsDto>();
             CreateMap<Author, AuthorReadOnlyDto>();
 
             CreateMap<Book, BookReadOnlyDto>()

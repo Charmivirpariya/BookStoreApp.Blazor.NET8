@@ -1,0 +1,52 @@
+﻿@page "/authors/create"
+@using BookStoreAppBlazor.Server.UI.Static
+@using Microsoft.AspNetCore.Authorization
+@* @using BookStoreApp.API.Models.Author *@
+@inject IAuthorService AuthorService
+@inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = Roles.Administrator)]
+
+<h3>Create New Author</h3>
+
+<EditForm Model="author" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">First Name</label>
+        <InputText class="form-control" @bind-Value="author.FirstName" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Last Name</label>
+        <InputText class="form-control" @bind-Value="author.LastName" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Bio</label>
+        <InputTextArea class="form-control" @bind-Value="author.Bio" rows="5" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        <span class="bi bi-save"></span> Save
+    </button>
+
+    <a class="btn btn-secondary ms-2" href="/authors/index">
+        <span class="bi bi-arrow-left"></span> Back
+    </a>
+</EditForm>
+
+
+@code {
+    private AuthorCreateDto author = new AuthorCreateDto();
+
+    private async Task HandleSubmit()
+    {
+        var response = await AuthorService.CreateAuthor(author);
+
+        if (response.Success)
+        {
+            NavigationManager.NavigateTo("/authors/index");
+        }
+    }
+}
