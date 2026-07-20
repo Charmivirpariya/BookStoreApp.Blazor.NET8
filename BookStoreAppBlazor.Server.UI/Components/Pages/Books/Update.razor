@@ -1,0 +1,160 @@
+﻿@page "/books/update/{id:int}"
+
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = Roles.Administrator)]
+
+@inject IBookService bookService
+@inject IAuthorService authorService
+@inject NavigationManager Navigation
+
+<h3>Update Book</h3>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-danger">
+        @message
+    </div>
+}
+
+@if (Book == null)
+{
+    <div class="alert alert-info">
+        Loading book...
+    </div>
+}
+else
+{
+    <EditForm Model="Book" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <InputText class="form-control" @bind-Value="Book.Title" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Author</label>
+                    <InputSelect class="form-select" @bind-Value="Book.AuthorId">
+                        <option value="">-- Select Author --</option>
+
+                        @foreach (var author in Authors)
+                        {
+                            <option value="@author.Id">
+                                @author.FirstName @author.LastName
+                            </option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Year</label>
+                    <InputNumber class="form-control" @bind-Value="Book.Year" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">ISBN</label>
+                    <InputText class="form-control" @bind-Value="Book.Isbn" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Price</label>
+                    <InputNumber class="form-control" @bind-Value="Book.Price" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Image URL</label>
+                    <InputText class="form-control" @bind-Value="Book.Image" />
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Book.Image))
+                {
+                    <div class="mb-3">
+                        <img src="@Book.Image"
+                             class="img-thumbnail"
+                             style="width:150px;height:220px;object-fit:contain;" />
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label">Summary</label>
+                    <InputTextArea class="form-control"
+                                   rows="5"
+                                   @bind-Value="Book.Summary" />
+                </div>
+
+                <button class="btn btn-primary" type="submit">
+                    <span class="bi bi-pencil-square me-2"></span>
+                    Update
+                </button>
+
+                <a class="btn btn-secondary ms-2" href="/books/index">
+                    Cancel
+                </a>
+
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private BookUpdateDto? Book;
+
+    private List<AuthorReadOnlyDto> Authors = new();
+
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load authors
+        var authorResponse = await authorService.GetAuthors();
+
+        if (authorResponse.Success)
+        {
+            Authors = authorResponse.Data;
+        }
+
+        // Load book
+        var bookResponse = await bookService.GetBookById(Id);
+
+        if (bookResponse.Success)
+        {
+            Book = new BookUpdateDto
+            {
+                Id = bookResponse.Data.Id,
+                Title = bookResponse.Data.Title,
+                Year = bookResponse.Data.Year,
+                Isbn = bookResponse.Data.Isbn,
+                Summary = bookResponse.Data.Summary,
+                Image = bookResponse.Data.Image,
+                Price = bookResponse.Data.Price,
+                AuthorId = bookResponse.Data.AuthorId
+            };
+        }
+        else
+        {
+            message = bookResponse.Message;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        var response = await bookService.UpdateBook(Id, Book);
+
+        if (response.Success)
+        {
+            Navigation.NavigateTo("/books/index");
+        }
+        else
+        {
+            message = response.Message;
+        }
+    }
+}

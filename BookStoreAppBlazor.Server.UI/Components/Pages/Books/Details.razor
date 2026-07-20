@@ -1,0 +1,138 @@
+﻿@page "/books/details/{id:int}"
+
+@inject IBookService bookService
+@inject NavigationManager Navigation
+
+<h3>Book Details</h3>
+
+@if (response.Success == false)
+{
+    <div class="alert alert-danger">
+        @response.Message
+    </div>
+}
+else if (Book == null)
+{
+    <div class="alert alert-info">
+        Loading book...
+    </div>
+}
+else
+{
+    <div class="container py-4">
+
+    <div class="card shadow border-0 rounded-4 mx-auto" style="max-width:950px;">
+        <div class="card-body p-5">
+
+            <div class="row g-5 align-items-start">
+
+                <!-- Cover -->
+                <div class="col-lg-4 text-center p-3">
+
+                    <img src="@Book.Image"
+                         class="img-fluid rounded shadow"
+                         style="width:250px;height:370px;object-fit:cover;" />
+
+                </div>
+
+                <!-- Details -->
+                <div class="col-lg-8">
+
+                    <h1 class="fw-bold mb-2">@Book.Title</h1>
+
+                    <h5 class="text-muted mb-4">
+                        by @Book.AuthorName
+                    </h5>
+
+                    <div class="row mb-4">
+
+                        <div class="col-5 fw-semibold">
+                            Published
+                        </div>
+
+                        <div class="col-7">
+                            @Book.Year
+                        </div>
+
+                        <div class="col-5 fw-semibold mt-3">
+                            ISBN
+                        </div>
+
+                        <div class="col-7 mt-3">
+                            @Book.Isbn
+                        </div>
+
+                        <div class="col-5 fw-semibold mt-3">
+                            Price
+                        </div>
+
+                        <div class="col-7 mt-3 text-success fs-4 fw-bold">
+                            @Book.Price.ToString("C")
+                        </div>
+
+                    </div>
+
+                    <hr />
+
+                    <h4>About this book</h4>
+
+                    <p class="text-secondary lh-lg">
+                        @Book.Summary
+                    </p>
+
+                    <div class="mt-4">
+
+                        <a href="/books/index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="bi bi-arrow-left"></i>
+
+                            Back
+
+                        </a>
+
+                        <AuthorizeView Roles="Administrator">
+                            <a href="/books/update/@Book.Id"
+                               class="btn btn-primary ms-2">
+
+                                <i class="bi bi-pencil-square"></i>
+
+                                Edit
+
+                            </a>
+                        </AuthorizeView>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+}
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private BookDetailsDto? Book;
+
+    private Response<BookDetailsDto> response = new()
+    {
+        Success = true
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await bookService.GetBookById(Id);
+
+        if (response.Success)
+        {
+            Book = response.Data;
+        }
+    }
+}

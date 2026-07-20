@@ -2,7 +2,7 @@
 
 namespace BookStoreAppBlazor.Server.UI.Services
 {
-    internal interface IAuthorService
+    public interface IAuthorService
     {
         Task<Response<List<AuthorReadOnlyDto>>> GetAuthors();
 

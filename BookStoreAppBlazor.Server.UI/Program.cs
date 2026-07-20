@@ -33,6 +33,8 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
 // Services
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
+builder.Services.AddScoped<IBookService, BookService>();
+
 
 builder.Services.AddAutoMapper(typeof(MapperConfig));
 
