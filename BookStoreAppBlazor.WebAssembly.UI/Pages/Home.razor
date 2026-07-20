@@ -1,0 +1,211 @@
+﻿@page "/"
+
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IBookService bookService
+@inject IAuthorService authorService
+
+<PageTitle>Home</PageTitle>
+
+<div class="container py-3">
+
+    <AuthorizeView Context="authState">
+
+        <Authorized>
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+
+                    <h2 class="fw-bold">
+                        Welcome, @authState.User.Identity?.Name
+                    </h2>
+
+                    <p class="text-muted mb-3">
+                        Manage your bookstore by adding, updating and organizing books and authors.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <a href="/books/index" class="btn btn-outline-dark">
+                            <i class="bi bi-book me-2"></i>
+                            Browse Books
+                        </a>
+
+                        <a href="/authors/index" class="btn btn-outline-dark">
+                            <i class="bi bi-person me-2"></i>
+                            Browse Authors
+                        </a>
+
+                        <AuthorizeView Roles="Administrator">
+                            <a href="/books/create" class="btn btn-outline-dark">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Add Book
+                            </a>
+
+                            <a href="/authors/create" class="btn btn-outline-dark">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Add Author
+                            </a>
+                        </AuthorizeView>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </Authorized>
+
+        <NotAuthorized>
+
+            <div class="card shadow-sm border-0 text-center mb-4">
+                <div class="card-body p-5">
+
+                    <h1 class="fw-bold"> BookStore</h1>
+
+                    <p class="text-muted">
+                        Welcome to BookStore. Browse books and authors after logging in.
+                    </p>
+
+                    <a href="/users/login" class="btn btn-primary me-2">
+                        Login
+                    </a>
+
+                    <a href="/users/register" class="btn btn-outline-primary">
+                        Register
+                    </a>
+
+                </div>
+            </div>
+
+        </NotAuthorized>
+
+    </AuthorizeView>
+
+    <!-- Dashboard -->
+
+    <div class="row mb-5">
+
+        <div class="col-md-6 mb-3">
+
+            <div class="card border-0 shadow-sm text-center h-100">
+
+                <div class="card-body">
+
+                    <i class="bi bi-book display-5 text-success fs-2"></i>
+
+                    <h2 class="mt-2">@BooksCount</h2>
+
+                    <p class="text-muted mb-0">
+                        Total Books
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6 mb-3">
+
+            <div class="card border-0 shadow-sm text-center h-100">
+
+                <div class="card-body">
+
+                    <i class="bi bi-person display-5 text-success fs-2"></i>
+
+                    <h2 class="mt-2">@AuthorsCount</h2>
+
+                    <p class="text-muted mb-0">
+                        Total Authors
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @if (Books.Any())
+    {
+        <h3 class="mb-4">
+            Recently Added Books
+        </h3>
+
+        <div class="row">
+
+            @foreach (var book in Books.TakeLast(4))
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+
+                    <div class="card h-100 shadow-sm border-0">
+
+                        <div class="text-center p-3">
+
+                            <img src="@book.Image"
+                                 class="img-fluid rounded"
+                                 style="height:260px;object-fit:contain;" />
+
+                        </div>
+
+                        <div class="card-body">
+
+                            <h6 class="fw-bold text-truncate">
+                                @book.Title
+                            </h6>
+
+                            <p class="text-muted mb-2">
+                                @book.AuthorName
+                            </p>
+
+                            <h6 class="text-success">
+                                @book.Price.ToString("C")
+                            </h6>
+
+                        </div>
+
+                        <div class="card-footer bg-white border-0">
+
+                            <a href="/books/details/@book.Id"
+                               class="btn btn-outline-primary btn-sm w-100">
+                                <i class="bi bi-eye"></i>
+                                View Details
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
+
+@code {
+
+    private List<BookReadOnlyDto> Books = new();
+
+    private int BooksCount;
+    private int AuthorsCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var booksResponse = await bookService.GetBooks();
+        var authorsResponse = await authorService.GetAuthors();
+
+        if (booksResponse.Success)
+        {
+            Books = booksResponse.Data;
+            BooksCount = Books.Count;
+        }
+
+        if (authorsResponse.Success)
+        {
+            AuthorsCount = authorsResponse.Data.Count;
+        }
+    }
+
+}

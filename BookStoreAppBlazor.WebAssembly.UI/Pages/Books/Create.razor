@@ -1,0 +1,129 @@
+﻿@page "/books/create"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = Roles.Administrator)]
+@inject IBookService bookService
+@inject IAuthorService authorService
+@inject NavigationManager Navigation
+
+
+<h3>Create New Book</h3>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-danger">
+        @message
+    </div>
+}
+
+<EditForm Model="Book" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <InputText class="form-control" @bind-Value="Book.Title" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Author</label>
+                <InputSelect class="form-select" @bind-Value="Book.AuthorId">
+                    <option value="">-- Select Author --</option>
+
+                    @foreach (var author in Authors)
+                    {
+                        <option value="@author.Id">
+                            @author.FirstName @author.LastName
+                        </option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Year</label>
+                <InputNumber class="form-control" @bind-Value="Book.Year" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">ISBN</label>
+                <InputText class="form-control" @bind-Value="Book.Isbn" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Price</label>
+                <InputNumber class="form-control" @bind-Value="Book.Price" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Image URL</label>
+                <InputText class="form-control" @bind-Value="Book.Image" />
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Book.Image))
+            {
+                <img src="@Book.Image"
+                     class="img-thumbnail mb-3"
+                     style="width:150px;height:220px;object-fit:cover;" />
+            }
+
+            <div class="mb-3">
+                <label class="form-label">Summary</label>
+                <InputTextArea class="form-control"
+                               rows="5"
+                               @bind-Value="Book.Summary" />
+            </div>
+
+            <button class="btn btn-primary" type="submit">
+                <span class="bi bi-plus-circle"></span>
+                Create
+            </button>
+
+            <a class="btn btn-secondary ms-2" href="/books/index">
+                Cancel
+            </a>
+
+        </div>
+    </div>
+
+</EditForm>
+
+@code {
+
+    private BookCreateDto Book = new();
+
+    private List<AuthorReadOnlyDto> Authors = new();
+
+    private string message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await authorService.GetAuthors();
+
+        if (response.Success)
+        {
+            Authors = response.Data;
+        }
+        else
+        {
+            message = response.Message;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        var response = await bookService.CreateBook(Book);
+
+        if (response.Success)
+        {
+            Navigation.NavigateTo("/books/index");
+        }
+        else 
+        {
+            message = response.Message;
+        }
+    }
+
+}
+ 

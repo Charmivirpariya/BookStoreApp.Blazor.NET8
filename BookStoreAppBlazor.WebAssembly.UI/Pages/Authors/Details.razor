@@ -1,0 +1,164 @@
+﻿@page "/authors/details/{id:int}"
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject IAuthorService AuthorService
+@inject NavigationManager NavigationManager
+
+<h3 class="mb-4">
+    <span class="bi bi-person-vcard-fill text-dark"></span>
+    Author Details
+</h3>
+
+@if (author == null)
+{
+    <div class="text-center mt-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Loading author details...</p>
+    </div>
+}
+else
+{
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-light text-black rounded-top-4 py-3">
+            <h4 class="mb-0">
+                @* <span class="bi bi-person-circle me-2"></span> *@
+                @author.FirstName @author.LastName
+            </h4>
+        </div>
+
+        <div class="card-body p-4">
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="text-muted small">
+                        @* <span class="bi bi-person"></span> *@
+                        First Name
+                    </label>
+
+                    <div class="fs-5 fw-semibold">
+                        @author.FirstName
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="text-muted small">
+                        @* <span class="bi bi-person"></span> *@
+                        Last Name
+                    </label>
+
+                    <div class="fs-5 fw-semibold">
+                        @author.LastName
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="mb-3">
+                <label class="text-muted small">
+                    <span class="bi bi-file-text"></span>
+                    Biography
+                </label>
+
+                <div class="bg-light border rounded-3 p-3 mt-2">
+                    @if (string.IsNullOrWhiteSpace(author.Bio))
+                    {
+                        <span class="text-muted fst-italic">
+                            No biography available.
+                        </span>
+                    }
+                    else
+                    {
+                        @author.Bio
+                    }
+                </div>
+            </div>
+
+        </div>
+        <div class="card-body border-top">
+            <h4 class="mb-4">
+                
+                Books by @author.FirstName @author.LastName
+            </h4>
+
+            @if (author.Books == null || !author.Books.Any())
+            {
+                <div class="alert alert-info">
+                    <span class="bi bi-book"></span>
+                    This author has no books associated with them.
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    @foreach (var book in author.Books)
+                    {
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card shadow-sm h-100 rounded-4 border-0">
+
+                                <img src="@book.Image"
+                                     class="card-img-top"
+                                     style="height:250px;object-fit:contain;"
+                                     alt="@book.Title" />
+
+                                <div class="card-body d-flex flex-column">
+
+                                    <h5 class="card-title text-truncate">
+                                        @book.Title
+                                    </h5>
+
+                                    <p class="text-success fw-bold fs-5 mb-3">
+                                        ₹@book.Price
+                                    </p>
+
+                                    <a href="/books/details/@book.Id"
+                                       class="btn btn-outline-primary mt-auto">
+                                        <span class="bi bi-eye"></span>
+                                        View Details
+                                    </a>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        <div class="card-footer bg-white d-flex justify-content-end gap-2 rounded-bottom-4">
+            <AuthorizeView Roles="Administrator">
+                <a class="btn btn-primary px-4"
+                   href="/authors/update/@author.Id">
+                    <span class="bi bi-pencil-square me-2"></span>
+                    Update
+                </a>
+            </AuthorizeView>
+            
+
+            <a class="btn btn-secondary px-4"
+               href="/authors/index">
+                <span class="bi bi-arrow-left me-2"></span>
+                Back
+            </a>
+
+        </div>
+        
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private AuthorDetailsDto author;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var response = await AuthorService.GetAuthorById(id);
+
+        if (response.Success)
+        {
+            author = response.Data;
+        }
+    }
+}
