@@ -1,4 +1,5 @@
 ﻿@page "/authors/index"
+@using BookStoreAppBlazor.Server.UI.Models
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IAuthorService authorService
 @inject IJSRuntime jsRuntime
@@ -24,7 +25,8 @@ else
          Create</a>
     </AuthorizeView>
     <br />
-    <table class="table  table-responsive">
+    <AuthorTable Authors="Authors" TotalSize="TotalSize" OnScroll="LoadAuthors"></AuthorTable>
+    @* <table class="table  table-responsive">
         <thead>
             <tr>
                 <th>Firstname</th>
@@ -52,34 +54,28 @@ else
                 </tr>
             }
         </tbody>
-    </table>
+    </table> *@
 }
 
 @code {
     private List<AuthorReadOnlyDto> Authors;
-    private Response<List<AuthorReadOnlyDto>> response = new Response<List<AuthorReadOnlyDto>> { Success = true };
+    public int TotalSize{ get; set; }
+    private Response<AuthorReadOnlyDtoVirtualizeResponse> response = new Response<AuthorReadOnlyDtoVirtualizeResponse> { Success = true };
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await authorService.GetAuthors();
+        var response = await authorService.GetAuthors(new QueryParameters {StartIndex=0});
         if (response.Success)
         {
-            Authors = response.Data;
+            Authors = response.Data.Items.ToList();
         }
 
     }
-    private async Task Delete(int authorId)
+    private async Task LoadAuthors(QueryParameters queryParameters)
     {
-        var author = Authors.FirstOrDefault(a => a.Id == authorId)?.FirstName + " " + Authors.FirstOrDefault(a => a.Id == authorId)?.LastName;
-        var confirm = await jsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete the author {author}?");
-        if (confirm)
-        {
-           var response=await authorService.Delete(authorId);
-            if (response.Success)
-            {
-                await OnInitializedAsync();
-            }
-        }
         
+        var virtualResult = await authorService.GetAuthors(queryParameters);
+        Authors = virtualResult.Data.Items.ToList();
+        TotalSize = virtualResult.Data.TotalSize;
     }
 }

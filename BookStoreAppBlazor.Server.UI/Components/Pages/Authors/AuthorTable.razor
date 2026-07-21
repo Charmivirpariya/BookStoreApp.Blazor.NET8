@@ -1,0 +1,69 @@
+﻿@using BookStoreAppBlazor.Server.UI.Models
+@inject IAuthorService authorService
+@inject IJSRuntime jSRuntime
+
+<table class="table table-responsive">
+    <thead>
+        <tr>
+            <th>Firstname</th>
+            <th>Lastname</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <Virtualize ItemsProvider="LoadAuthors" Context="author">
+             <tr>
+                    <td>@author.FirstName</td>
+                    <td>@author.LastName</td>
+                    <td>
+                        
+                        <a class="btn btn-outline-primary" href="/authors/details/@author.Id"><span class="bi bi-book" aria-hidden="true"></span> Details</a>
+                        
+                        <AuthorizeView Roles="Administrator">
+                            <a class="btn btn-outline-secondary" href="/authors/update/@author.Id"><span class="bi bi-pencil" aria-hidden="true"></span> Edit</a>
+                            <button class="btn btn-outline-danger" @onclick=@(()=>Delete(@author.Id))>
+                            <span class="bi bi-trash" aria-hidden="true"></span>Delete</button>
+                        </AuthorizeView>
+                    </td>
+                </tr>
+        </Virtualize>
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public List<AuthorReadOnlyDto> Authors { get; set; }
+
+    [Parameter]
+    public int TotalSize{ get; set; }
+
+    [Parameter]
+    public EventCallback<QueryParameters> OnScroll { get; set; }
+
+    private async ValueTask<ItemsProviderResult<AuthorReadOnlyDto>> LoadAuthors(ItemsProviderRequest request)
+    {
+        var productNum = Math.Min(request.Count, TotalSize - request.StartIndex);
+        await OnScroll.InvokeAsync(new QueryParameters
+        {
+            StartIndex = request.StartIndex,
+            PageSize = productNum == 0 ? request.Count : productNum
+        });
+        return new ItemsProviderResult<AuthorReadOnlyDto>(Authors, TotalSize);
+    }
+
+    private async Task Delete(int authorId)
+    {
+        var author = Authors.FirstOrDefault(a => a.Id == authorId)?.FirstName + " " + Authors.FirstOrDefault(a => a.Id == authorId)?.LastName;
+        var confirm = await jSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete the author {author}?");
+        if (confirm)
+        {
+           var response=await authorService.Delete(authorId);
+            if (response.Success)
+            {
+                await OnInitializedAsync();
+            }
+        }
+    }
+
+
+}

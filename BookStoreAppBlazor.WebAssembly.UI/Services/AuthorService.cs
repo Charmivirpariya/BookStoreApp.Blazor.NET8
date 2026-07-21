@@ -63,7 +63,7 @@ namespace BookStoreAppBlazor.WebAssembly.UI.Services
             try
             {
                 await GetBearerToken();
-                var data = await client.AuthorsGETAsync(id);
+                var data = await client.AuthorsGET2Async(id);
                 response = new Response<AuthorDetailsDto>
                 {
                     Data = data,
@@ -85,7 +85,7 @@ namespace BookStoreAppBlazor.WebAssembly.UI.Services
             {
                 await GetBearerToken();
 
-                var data = await client.AuthorsGETAsync(id);
+                var data = await client.AuthorsGET2Async(id);
 
                 response = new Response<AuthorUpdateDto>
                 {
@@ -113,7 +113,7 @@ namespace BookStoreAppBlazor.WebAssembly.UI.Services
             try
             {
                 await GetBearerToken();
-                var data = await client.AuthorsAllAsync();
+                var data = await client.GetAllAsync();
                 response = new Response<List<AuthorReadOnlyDto>>
                 {
                     Data = data.ToList(),

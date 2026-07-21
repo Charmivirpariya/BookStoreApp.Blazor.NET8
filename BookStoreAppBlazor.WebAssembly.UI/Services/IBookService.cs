@@ -1,4 +1,5 @@
-﻿using BookStoreAppBlazor.WebAssembly.UI.Services.Base;
+﻿
+using BookStoreAppBlazor.WebAssembly.UI.Services.Base;
 
 namespace BookStoreAppBlazor.WebAssembly.UI.Services
 {

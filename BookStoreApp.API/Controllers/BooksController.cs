@@ -5,18 +5,19 @@ using AutoMapper;
 using BookStoreApp.API.Models.Book;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Authorization;
+using BookStoreApp.API.Repositories;
 
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
 public class BooksController : ControllerBase
 {
-    private readonly BookStoreDbContext _context;
+    private readonly IBooksRepository booksRepository;
     private readonly IMapper mapper;
 
-    public BooksController(BookStoreDbContext context,IMapper mapper)
+    public BooksController(IBooksRepository booksRepository,IMapper mapper)
     {
-        _context = context;
+        this.booksRepository= booksRepository;
         this.mapper = mapper;
     }
 
@@ -24,9 +25,7 @@ public class BooksController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BookReadOnlyDto>>> GetBook()
     {
-        var bookDtos = await _context.Books.Include(b => b.Author)
-            .ProjectTo<BookReadOnlyDto>(mapper.ConfigurationProvider)
-            .ToListAsync();
+        var bookDtos = await booksRepository.GetAllBooksAsync();
         return Ok(bookDtos);
     }
 
@@ -34,10 +33,7 @@ public class BooksController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<BookDetailsDto>> GetBook(int id)
     {
-        var book = await _context.Books
-            .Include(b => b.Author)
-            .ProjectTo<BookDetailsDto>(mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync(b => b.Id == id);
+        var book = await booksRepository.GetBookAsync(id);
 
         if (book == null)
         {
@@ -51,24 +47,24 @@ public class BooksController : ControllerBase
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
     
-    public async Task<IActionResult> PutBook(int? id, BookUpdateDto bookDto)
+    public async Task<IActionResult> PutBook(int id, BookUpdateDto bookDto)
     {
         if (id != bookDto.Id)
         {
             return BadRequest();
         }
-        var book = await _context.Books.FindAsync(id);
+        var book = await booksRepository.GetAsync(id);
         if (book == null)
         {
             return NotFound();
            
         }
         mapper.Map(bookDto, book);          
-        _context.Entry(book).State = EntityState.Modified;
+       
 
         try
         {
-            await _context.SaveChangesAsync();
+            await booksRepository.UpdateAsync(book);
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -92,36 +88,30 @@ public class BooksController : ControllerBase
     public async Task<ActionResult<BookReadOnlyDto>> PostBook(BookCreateDto bookDto)
     {
         var book = mapper.Map<Book>(bookDto);
-        _context.Books.Add(book);
-        await _context.SaveChangesAsync();
 
-        var result = await _context.Books
-        .Include(b => b.Author)
-        .ProjectTo<BookReadOnlyDto>(mapper.ConfigurationProvider)
-        .FirstAsync(b => b.Id == book.Id);
+        var result = await booksRepository.CreateBook(book);
 
-        return CreatedAtAction(nameof(GetBook), new { id = book.Id }, result);
+        return CreatedAtAction(nameof(GetBook), new { id = result.Id }, result);
     }
 
     // DELETE: api/Book/5
     [HttpDelete("{id}")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteBook(int? id)
+    public async Task<IActionResult> DeleteBook(int id)
     {
-        var book = await _context.Books.FindAsync(id);
+        var book = await booksRepository.GetAsync(id);
         if (book == null)
         {
             return NotFound();
         }
-
-        _context.Books.Remove(book);
-        await _context.SaveChangesAsync();
+   
+        await booksRepository.DeleteAsync(id);
 
         return NoContent();
     }
 
-    private async Task<bool> BookExistsAsync(int? id)
+    private async Task<bool> BookExistsAsync(int id)
     {
-        return await _context.Books.AnyAsync(e => e.Id == id);
+        return await booksRepository.ExistsAsync(id);
     }
 }

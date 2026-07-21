@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Blazored.LocalStorage;
+using BookStoreAppBlazor.Server.UI.Models;
 using BookStoreAppBlazor.Server.UI.Services.Base;
 
 namespace BookStoreAppBlazor.Server.UI.Services
@@ -63,7 +64,7 @@ namespace BookStoreAppBlazor.Server.UI.Services
             try
             {
                 await GetBearerToken();
-                var data = await client.AuthorsGETAsync(id);
+                var data = await client.AuthorsGET2Async(id);
                 response = new Response<AuthorDetailsDto>
                 {
                     Data = data,
@@ -85,7 +86,7 @@ namespace BookStoreAppBlazor.Server.UI.Services
             {
                 await GetBearerToken();
 
-                var data = await client.AuthorsGETAsync(id);
+                var data = await client.AuthorsGET2Async(id);
 
                 response = new Response<AuthorUpdateDto>
                 {
@@ -113,7 +114,7 @@ namespace BookStoreAppBlazor.Server.UI.Services
             try
             {
                 await GetBearerToken();
-                var data = await client.AuthorsAllAsync();
+                var data = await client.GetAllAsync();
                 response = new Response<List<AuthorReadOnlyDto>>
                 {
                     Data = data.ToList(),
@@ -123,6 +124,26 @@ namespace BookStoreAppBlazor.Server.UI.Services
             catch (ApiException exception)
             {
                 response = ConvertApiException<List<AuthorReadOnlyDto>>(exception);
+            }
+            return response;
+        }
+
+        public async Task<Response<AuthorReadOnlyDtoVirtualizeResponse>> GetAuthors(QueryParameters queryParameters)
+        {
+            Response<AuthorReadOnlyDtoVirtualizeResponse> response;
+            try
+            {
+                await GetBearerToken();
+                var data = await client.AuthorsGETAsync(queryParameters.StartIndex, queryParameters.PageSize);
+                response = new Response<AuthorReadOnlyDtoVirtualizeResponse>
+                {
+                    Success = true,
+                    Data = data
+                };
+            }
+            catch (ApiException exception)
+            {
+                response = ConvertApiException<AuthorReadOnlyDtoVirtualizeResponse>(exception);
             }
             return response;
         }

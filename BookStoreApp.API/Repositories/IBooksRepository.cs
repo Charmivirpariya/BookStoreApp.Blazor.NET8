@@ -1,0 +1,13 @@
+﻿using BookStoreApp.API.Data;
+using BookStoreApp.API.Models.Book;
+
+namespace BookStoreApp.API.Repositories
+{
+    public interface IBooksRepository : IGenericRepository<Book>
+    {
+        Task<List<BookReadOnlyDto>> GetAllBooksAsync();
+        Task<BookDetailsDto> GetBookAsync(int id);
+
+        Task<BookReadOnlyDto> CreateBook(Book book);
+    }
+}

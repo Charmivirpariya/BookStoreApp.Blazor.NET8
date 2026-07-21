@@ -1,11 +1,11 @@
-﻿using BookStoreAppBlazor.WebAssembly.UI.Services.Base;
+﻿
+using BookStoreAppBlazor.WebAssembly.UI.Services.Base;
 
 namespace BookStoreAppBlazor.WebAssembly.UI.Services
 {
     public interface IAuthorService
     {
         Task<Response<List<AuthorReadOnlyDto>>> GetAuthors();
-
         Task<Response<AuthorDetailsDto>> GetAuthorById(int id);
 
         Task<Response<AuthorUpdateDto>> GetAuthorForUpdate(int id);

@@ -52,7 +52,7 @@
         {
             var response = await authService.AuthenticateAsync(LoginModel);
 
-            if (response)
+            if (response.Success)
             {
                 message = string.Empty;
 

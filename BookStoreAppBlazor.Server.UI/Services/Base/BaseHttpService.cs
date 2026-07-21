@@ -31,7 +31,16 @@ namespace BookStoreAppBlazor.Server.UI.Services.Base
                     Success = false
                 };
             }
-            if(e.StatusCode >=200 && e.StatusCode <= 299) { 
+            if (e.StatusCode == 401)
+            {
+                return new Response<Guid>
+                {
+                    Message = "Login credentials failed. ",
+                    ValidationErrors = e.Response,
+                    Success = false
+                };
+            }
+            if (e.StatusCode >=200 && e.StatusCode <= 299) { 
                 return new Response<Guid>
                 {
                     Message = "Operation successful.",

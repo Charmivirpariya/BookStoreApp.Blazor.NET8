@@ -1,5 +1,6 @@
 ﻿@page "/"
 
+@using BookStoreAppBlazor.Server.UI.Models
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IBookService bookService
 @inject IAuthorService authorService
@@ -159,7 +160,7 @@
                             </p>
 
                             <h6 class="text-success">
-                                @book.Price.ToString("C")
+                                ₹@book.Price
                             </h6>
 
                         </div>
@@ -194,7 +195,11 @@
     protected override async Task OnInitializedAsync()
     {
         var booksResponse = await bookService.GetBooks();
-        var authorsResponse = await authorService.GetAuthors();
+        var authorsResponse = await authorService.GetAuthors(new QueryParameters
+        {
+            StartIndex = 0,
+            PageSize = 10
+        });
 
         if (booksResponse.Success)
         {
@@ -204,7 +209,7 @@
 
         if (authorsResponse.Success)
         {
-            AuthorsCount = authorsResponse.Data.Count;
+            AuthorsCount = authorsResponse.Data.TotalSize;
         }
     }
 

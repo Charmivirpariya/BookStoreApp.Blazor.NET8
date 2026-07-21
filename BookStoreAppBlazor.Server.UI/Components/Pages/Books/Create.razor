@@ -1,4 +1,5 @@
 ﻿@page "/books/create"
+@using BookStoreAppBlazor.Server.UI.Models
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = Roles.Administrator)]
 @inject IBookService bookService
@@ -99,11 +100,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await authorService.GetAuthors();
+        var response = await authorService.GetAuthors(new QueryParameters
+        {
+            StartIndex = 0,
+            PageSize = 10
+        });
 
         if (response.Success)
         {
-            Authors = response.Data;
+            Authors = response.Data.Items.ToList();
         }
         else
         {
